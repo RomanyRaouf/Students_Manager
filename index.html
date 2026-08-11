@@ -27,7 +27,7 @@
     <h2> إعداد روماني رؤوف</h2>
     <form id="studentForm">
       <label>الاسم:</label><input type="text" id="name">
-      <label>الكود:</label><input type="text" id="Code">
+      <label>الكود:</label><input type="text" id="code">
       <label>الرقم القومي:</label>
 <input type="text" id="nid" oninput="fillDataFromNID()">
       <label>تاريخ الميلاد (تلقائي):</label><input type="text" id="birthdate" readonly>
@@ -116,7 +116,7 @@ function fillDataFromNID() {
 
       const student = {
         name: document.getElementById("name").value.trim(),
-        nickname: document.getElementById("nickname").value.trim(),
+        code: document.getElementById("code").value.trim(),
         nid: nid,
         birthdate: birthDate,
         gender: gender,
@@ -157,7 +157,7 @@ function fillDataFromNID() {
             found.forEach(s => {
               table += "<tr>";
               table += `<td>${s.name || ""}</td>`;
-              table += `<td>${s.nickname || ""}</td>`;
+              table += `<td>${s.code || ""}</td>`;
               table += `<td>${s.nid || ""}</td>`;
               table += `<td>${s.birthdate || ""}</td>`;
               table += `<td>${s.gender || ""}</td>`;
