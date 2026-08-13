@@ -22,20 +22,25 @@
 </head>
 <body>
   <div class="container">
-    <h2>📊 قائمة الطلاب</h2>
+    <h2>📊  إدارة شئون الطلاب</h2>
+    <h2>إعداد روماني رؤوف 01033353302</h2>
     <div id="studentsTable"></div>
-
     <h2>➕ إضافة طالب جديد</h2>
     <form id="studentForm">
       <label>الاسم:</label><input type="text" id="name">
       <label>الكود:</label><input type="text" id="studentCode">
-      <label>الرقم القومي:</label><input type="text" id="nid" oninput="fillDataFromNID()">
-      <label>تاريخ الميلاد:</label><input type="text" id="birthdate" readonly>
-      <label>النوع:</label><input type="text" id="gender" readonly>
-      <label>السن في 1-10-2026:</label>
-      <input type="text" id="ageDays" readonly placeholder="أيام">
-      <input type="text" id="ageMonths" readonly placeholder="شهور">
-      <input type="text" id="ageYears" readonly placeholder="سنوات">
+      <label>الرقم القومي:</label><input type="text" id="nid">
+      <label>تاريخ الميلاد:</label><input type="text" id="birthdate">
+      <label>النوع:</label>
+      <select id="gender">
+        <option value="">-- اختر --</option>
+        <option value="ذكر">ذكر</option>
+        <option value="أنثى">أنثى</option>
+      </select>
+      <label>السن (أيام/شهور/سنوات):</label>
+      <input type="text" id="ageDays" placeholder="أيام">
+      <input type="text" id="ageMonths" placeholder="شهور">
+      <input type="text" id="ageYears" placeholder="سنوات">
       <label>اسم ولي الأمر:</label><input type="text" id="guardian">
       <label>وظيفة ولي الأمر:</label><input type="text" id="guardianJob">
       <label>تليفون ولي الأمر:</label><input type="text" id="guardianPhone">
@@ -67,82 +72,46 @@
       </select>
       <button type="button" onclick="addStudent()">➕ إضافة الطالب</button>
     </form>
-
     <h2>🔍 بحث متقدم</h2>
     <label>الاسم:</label><input type="text" id="searchName">
     <label>الفصل:</label><input type="text" id="searchClassroom">
-    <label>الحالة الاجتماعية:</label>
-    <select id="searchStatus">
+    <label>النوع:</label>
+    <select id="searchGender">
       <option value="">-- اختر --</option>
-      <option value="شئون">شئون</option>
-      <option value="أيتام">أيتام</option>
-      <option value="أبناء عاملين">أبناء عاملين</option>
-      <option value="تنمية مجتمع">تنمية مجتمع</option>
+      <option value="ذكر">ذكر</option>
+      <option value="أنثى">أنثى</option>
     </select>
     <button onclick="searchStudent()">بحث</button>
     <button onclick="exportExcel()">📤 تصدير لإكسل</button>
     <button onclick="printReport()">🖨️ طباعة التقرير</button>
     <div id="result"></div>
   </div>
-
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz0a1yFDA5B0clVHgGP8ixrfijm3tSSQ0LTCpudsN39PzeZ0KxWi6s0OLQqwqfXLDjZ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyf97wGyA9YnC-pPAktkawRYO4DRYVYdPk053_TxxuhfI6MIYeJuWHIpiZk10hKIyJM/exec";
 
-// 🟢 دوال الحساب والاستخراج
-function calculateAge(birthDate, baseDate="2026-10-01") {
-  const b = new Date(birthDate);
-  const d = new Date(baseDate);
-  let years = d.getFullYear() - b.getFullYear();
-  let months = d.getMonth() - b.getMonth();
-  let days = d.getDate() - b.getDate();
-  if (days < 0) { months--; days += new Date(d.getFullYear(), d.getMonth(), 0).getDate(); }
-  if (months < 0) { years--; months += 12; }
-  return { years, months, days };
-}
-
-function fillDataFromNID() {
-  const nid = document.getElementById("nid").value.trim();
-  if (nid.length < 14) return;
-  const century = nid.substring(0,1) === "2" ? "19" : "20";
-  const year = nid.substring(1,3);
-  const month = nid.substring(3,5);
-  const day = nid.substring(5,7);
-  const birthDate = `${century}${year}-${month}-${day}`;
-  const genderDigit = parseInt(nid.substring(12,13));
-  const gender = (genderDigit % 2 === 0) ? "أنثى" : "ذكر";
-  document.getElementById("birthdate").value = birthDate;
-  document.getElementById("gender").value = gender;
-  const age = calculateAge(birthDate);
-  document.getElementById("ageDays").value = age.days;
-  document.getElementById("ageMonths").value = age.months;
-  document.getElementById("ageYears").value = age.years;
-}
-
-// 🟢 دوال الدمج
 function toggleDisability() {
   const mergeStatus = document.getElementById("mergeStatus").value;
   document.getElementById("disabilityDiv").style.display = (mergeStatus==="دمج") ? "block" : "none";
 }
 
-// 🟢 دالة الإضافة
 function addStudent() {
   const student = {
     name: document.getElementById("name").value.trim(),
     studentCode: document.getElementById("studentCode").value.trim(),
     nid: document.getElementById("nid").value.trim(),
-    birthdate: document.getElementById("birthdate").value,
+    birthdate: document.getElementById("birthdate").value.trim(),
     gender: document.getElementById("gender").value,
-    ageDays: document.getElementById("ageDays").value,
-    ageMonths: document.getElementById("ageMonths").value,
-    ageYears: document.getElementById("ageYears").value,
+    ageDays: document.getElementById("ageDays").value.trim(),
+    ageMonths: document.getElementById("ageMonths").value.trim(),
+    ageYears: document.getElementById("ageYears").value.trim(),
     guardian: document.getElementById("guardian").value.trim(),
     guardianJob: document.getElementById("guardianJob").value.trim(),
     guardianPhone: document.getElementById("guardianPhone").value.trim(),
     studentPhone: document.getElementById("studentPhone").value.trim(),
     status: document.getElementById("status").value,
     mergeStatus: document.getElementById("mergeStatus").value,
-    disability: document.getElementById("disability").value,
-        mother: document.getElementById("mother").value.trim(),
+    disability: document.getElementById("disability").value.trim(),
+    mother: document.getElementById("mother").value.trim(),
     classroom: document.getElementById("classroom").value.trim(),
     secondLang: document.getElementById("secondLang").value
   };
@@ -151,26 +120,44 @@ function addStudent() {
     .then(res=>res.text())
     .then(msg=>{
       document.getElementById("result").innerText=msg;
-      loadStudents(); // بعد الإضافة اعرض كل الطلاب من جديد
+      loadStudents();
+      document.getElementById("studentForm").reset();
     })
     .catch(err=>{
       document.getElementById("result").innerText="❌ خطأ في الاتصال بالشيت";
+      console.error(err);
     });
 }
-
-// 🟢 دالة تحميل الطلاب عند فتح الصفحة
 function loadStudents() {
   fetch(API_URL+"?search=all")
     .then(res=>res.json())
     .then(data=>{
-      let table="<table><tr><th>الاسم</th><th>الكود</th><th>الرقم القومي</th><th>الفصل</th><th>الحالة الاجتماعية</th></tr>";
+      let table="<table><tr><th>الاسم</th><th>الفصل</th><th>النوع</th></tr>";
       data.forEach(s=>{
         table+=`<tr>
           <td>${s.name||""}</td>
-          <td>${s.studentCode||""}</td>
-          <td>${s.nid||""}</td>
           <td>${s.classroom||""}</td>
-          <td>${s.status||""}</td>
+          <td>${s.gender||""}</td>
+        </tr>`;
+      });
+      table+="</table>";
+      document.getElementById("studentsTable").innerHTML=table;
+    })
+    .catch(err=>{
+      document.getElementById("studentsTable").innerText = "❌ خطأ في تحميل البيانات";
+      console.error("خطأ في الاتصال بالشيت:", err);
+    });
+}
+function loadStudents() {
+  fetch(API_URL+"?search=all")
+    .then(res=>res.json())
+    .then(data=>{
+      let table="<table><tr><th>الاسم</th><th>الفصل</th><th>النوع</th></tr>";
+      data.forEach(s=>{
+        table+=`<tr>
+          <td>${s.name||""}</td>
+          <td>${s.classroom||""}</td>
+          <td>${s.gender||""}</td>
         </tr>`;
       });
       table+="</table>";
@@ -178,40 +165,46 @@ function loadStudents() {
     })
     .catch(err=>{
       document.getElementById("studentsTable").innerText="❌ خطأ في تحميل البيانات";
+      console.error(err);
     });
 }
 
-// 🟢 دالة البحث المتقدم
 function searchStudent() {
   const name = document.getElementById("searchName").value.trim();
   const classroom = document.getElementById("searchClassroom").value.trim();
-  const status = document.getElementById("searchStatus").value;
+  const gender = document.getElementById("searchGender").value;
 
   fetch(API_URL+"?search=all")
     .then(res=>res.json())
     .then(data=>{
       let filtered = data.filter(s=>{
         return (!name || (s.name && s.name.includes(name))) &&
-               (!classroom || (s.classroom && s.classroom.includes(classroom))) &&
-               (!status || s.status===status);
+               (!classroom || (s.classroom && String(s.classroom).includes(classroom))) &&
+               (!gender || s.gender===gender);
       });
 
-      let table="<table><tr><th>الاسم</th><th>الكود</th><th>الرقم القومي</th><th>الفصل</th><th>الحالة الاجتماعية</th></tr>";
+      if(filtered.length === 0){
+        document.getElementById("studentsTable").innerHTML = "<p>⚠️ لا توجد نتائج مطابقة</p>";
+        return;
+      }
+
+      let table="<table><tr><th>الاسم</th><th>الفصل</th><th>النوع</th></tr>";
       filtered.forEach(s=>{
         table+=`<tr>
           <td>${s.name||""}</td>
-          <td>${s.studentCode||""}</td>
-          <td>${s.nid||""}</td>
           <td>${s.classroom||""}</td>
-          <td>${s.status||""}</td>
+          <td>${s.gender||""}</td>
         </tr>`;
       });
       table+="</table>";
       document.getElementById("studentsTable").innerHTML=table;
+    })
+    .catch(err=>{
+      document.getElementById("studentsTable").innerText="❌ خطأ في الاتصال بالشيت";
+      console.error(err);
     });
 }
 
-// 🟢 دالة التصدير لإكسل
 function exportExcel() {
   const table=document.querySelector("#studentsTable table");
   if(!table){alert("⚠️ لا توجد بيانات لتصديرها");return;}
@@ -219,7 +212,6 @@ function exportExcel() {
   XLSX.writeFile(wb,"students.xlsx");
 }
 
-// 🟢 دالة الطباعة
 function printReport() {
   const content=document.getElementById("studentsTable").innerHTML;
   if(!content){alert("⚠️ لا توجد بيانات للطباعة");return;}
@@ -233,7 +225,6 @@ function printReport() {
   printWindow.print();
 }
 
-// 🟢 تحميل الطلاب عند فتح الصفحة
 window.onload = loadStudents;
 </script>
 </body>
