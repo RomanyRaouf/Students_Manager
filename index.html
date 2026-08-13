@@ -29,7 +29,9 @@
     <form id="studentForm">
       <label>الاسم:</label><input type="text" id="name">
       <label>الكود:</label><input type="text" id="studentCode">
-      <label>الرقم القومي:</label><input type="text" id="nid">
+      <label>الرقم القومي:</label>
+<input type="text" id="nid" onkeyup="autoFillFromNID()">
+
       <label>تاريخ الميلاد:</label><input type="text" id="birthdate">
       <label>النوع:</label>
       <select id="gender">
@@ -128,26 +130,45 @@ function addStudent() {
       console.error(err);
     });
 }
-function loadStudents() {
-  fetch(API_URL+"?search=all")
-    .then(res=>res.json())
-    .then(data=>{
-      let table="<table><tr><th>الاسم</th><th>الفصل</th><th>النوع</th></tr>";
-      data.forEach(s=>{
-        table+=`<tr>
-          <td>${s.name||""}</td>
-          <td>${s.classroom||""}</td>
-          <td>${s.gender||""}</td>
-        </tr>`;
-      });
-      table+="</table>";
-      document.getElementById("studentsTable").innerHTML=table;
-    })
-    .catch(err=>{
-      document.getElementById("studentsTable").innerText = "❌ خطأ في تحميل البيانات";
-      console.error("خطأ في الاتصال بالشيت:", err);
-    });
+  
+function autoFillFromNID() {
+  const nid = document.getElementById("nid").value.trim();
+  if(nid.length !== 14) return; // لازم 14 رقم
+
+  // استخراج تاريخ الميلاد
+  let century = (nid[0] === "2") ? 1900 : 2000;
+  let year = century + parseInt(nid.substr(1,2));
+  let month = parseInt(nid.substr(3,2));
+  let day = parseInt(nid.substr(5,2));
+
+  let birthdate = new Date(year, month-1, day);
+  document.getElementById("birthdate").value = `${day}/${month}/${year}`;
+
+  // استخراج النوع
+  let genderDigit = parseInt(nid[12]);
+  let gender = (genderDigit % 2 === 0) ? "أنثى" : "ذكر";
+  document.getElementById("gender").value = gender;
+
+  // حساب العمر حتى 1-10
+  let today = new Date(new Date().getFullYear(), 9, 1); // 1 أكتوبر
+  let ageYears = today.getFullYear() - birthdate.getFullYear();
+  let ageMonths = today.getMonth() - birthdate.getMonth();
+  let ageDays = today.getDate() - birthdate.getDate();
+
+  if(ageDays < 0) {
+    ageMonths--;
+    ageDays += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+  }
+  if(ageMonths < 0) {
+    ageYears--;
+    ageMonths += 12;
+  }
+
+  document.getElementById("ageYears").value = ageYears;
+  document.getElementById("ageMonths").value = ageMonths;
+  document.getElementById("ageDays").value = ageDays;
 }
+
 function loadStudents() {
   fetch(API_URL+"?search=all")
     .then(res=>res.json())
